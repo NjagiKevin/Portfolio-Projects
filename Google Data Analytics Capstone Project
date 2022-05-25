@@ -1,0 +1,70 @@
+setwd("~/DATA ANALYSIS PROJECTS 2022/Cyclist")
+library(tidyverse)
+
+#Importing the data sets
+Jan<-read_csv('Jan_Trips.csv')
+Feb<-read_csv('Feb_Trips.csv')
+March<-read_csv('March_Trips.csv')
+April<-read_csv('April_Trips.csv')
+May<-read_csv('May_Trips.csv')
+June<-read_csv('June_Trips.csv')
+July<-read_csv('July_Trips.csv')
+Aug<-read_csv('August_Trips.csv')
+Sept<-read_csv('September_Trips.csv')
+Oct<-read_csv('October_Trips.csv')
+Nov<-read_csv('November_Trips.csv')
+Dec<-read_csv('December_Trips.csv')
+
+#Call out the column names
+colnames(Jan)
+colnames(Feb)
+colnames(March)
+colnames(April)
+colnames(May)
+colnames(June)
+colnames(July)
+colnames(Aug)
+colnames(Sept)
+colnames(Oct)
+colnames(Nov)
+colnames(Dec)
+
+#Combining the rows from all the months
+Year_2021_Trips<-bind_rows(Jan,Feb,March,April,May,June,July,Aug,Sept,Oct,Nov,Dec)
+View(Year_2021_Trips)
+
+
+#Removed columns I deemed not useful
+Year_2021_Trips<-Year_2021_Trips %>% 
+  select(-c(start_lat,start_lng,end_lat,end_lng))
+glimpse(Year_2021_Trips)
+
+
+#Removed all rows that have n/a values
+Year_2021<-na.omit(Year_2021_Trips)
+glimpse(Year_2021)
+view(Year_2021)
+colnames(Year_2021)
+
+
+
+#Added more columns to make aggregation of data more comprehensive
+Year_2021$date<-as.Date(Year_2021$started_at) #format is yyyy-mm-dd
+Year_2021$month<-format(as.Date(Year_2021$date),"%m")
+Year_2021$day<-format(as.Date(Year_2021$date),"%d")
+Year_2021$year<-format(as.Date(Year_2021$date),"%y")
+Year_2021$day_of_week<-format(as.Date(Year_2021$date),"%A")
+
+Year_2021$ride_length<-difftime(Year_2021$ended_at,Year_2021$started_at)
+
+#Since docked and classic bikes are the same, change the name docked bikes to classic bikes and count them.
+Year_2021_Clean<-Year_2021 %>% mutate(rideable_type=str_replace(rideable_type,"docked_bike","classic_bike"))
+head(Year_2021_Clean)
+
+
+#Count the number of "electric" and "classic" bikes
+Year_2021_Clean %>% count(rideable_type)
+dim(Year_2021_Clean)
+
+#Exporting our table
+write.csv(Year_2021_Clean,"Year_2021_Clean.csv")
